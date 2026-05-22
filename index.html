@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevSecOps Foundation Exam Simulator</title>
+  <meta name="description" content="A free, local-only practice simulator for the DevSecOps Foundation syllabus — practice mode, exam mode, revision mode, and progress tracking." />
+  <meta name="theme-color" content="#0f1226" />
+  <meta name="color-scheme" content="dark" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="DevSecOps Foundation Exam Simulator" />
+  <meta property="og:description" content="Practice, exam, and revision modes for the DevSecOps Foundation syllabus. Runs entirely in your browser." />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="DevSecOps Foundation Exam Simulator" />
+  <meta name="twitter:description" content="Practice, exam, and revision modes for the DevSecOps Foundation syllabus. Runs entirely in your browser." />
+
+  <!-- Inline SVG favicon (no extra file needed) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%235b8cff'/><stop offset='1' stop-color='%238a6bff'/></linearGradient></defs><rect width='64' height='64' rx='14' fill='url(%23g)'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Segoe UI,Arial' font-weight='800' font-size='22' fill='white'>DSO</text></svg>" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">DSO</span>
+      <div class="brand-text">
+        <h1>DevSecOps Foundation</h1>
+        <p>Exam Simulator</p>
+      </div>
+    </div>
+    <nav class="topnav">
+      <button id="navHome" class="nav-link active" type="button">Home</button>
+      <button id="navStats" class="nav-link" type="button">Stats</button>
+      <button id="navReset" class="nav-link danger" type="button">Reset</button>
+    </nav>
+  </header>
+
+  <main id="app">
+
+    <!-- ───────────────────────── Home / Mode select ───────────────────────── -->
+    <section id="screen-home" class="screen active">
+      <div id="resumeBanner" class="resume-banner hidden">
+        <div class="resume-text">
+          <strong>Resume your last session?</strong>
+          <span id="resumeMeta" class="muted small"></span>
+        </div>
+        <div class="resume-actions">
+          <button id="btnResumeYes" class="btn primary" type="button">Resume</button>
+          <button id="btnResumeNo"  class="btn ghost"   type="button">Discard</button>
+        </div>
+      </div>
+
+      <div class="hero">
+        <h2>Choose your study mode</h2>
+        <p class="muted">
+          A focused practice tool for the DevSecOps Foundation syllabus —
+          principles, culture, controls, threat modeling, security testing,
+          CI/CD, secrets, cloud/containers, monitoring, and IAM.
+        </p>
+      </div>
+
+      <div class="mode-grid">
+        <article class="mode-card" data-mode="practice">
+          <div class="mode-icon">P</div>
+          <h3>Practice Mode</h3>
+          <p>Instant feedback after every question with full explanations. Ideal while you learn.</p>
+          <ul class="mode-bullets">
+            <li>Immediate answer reveal</li>
+            <li>Pick number of questions</li>
+            <li>Optional category filter</li>
+          </ul>
+          <button class="btn primary" data-start="practice" type="button">Start Practice</button>
+        </article>
+
+        <article class="mode-card highlight" data-mode="exam">
+          <div class="mode-icon">E</div>
+          <h3>Exam Mode</h3>
+          <p>Timed, exam-like conditions. Answers and explanations are revealed only at the end.</p>
+          <ul class="mode-bullets">
+            <li>Configurable timer</li>
+            <li>Mark for review &amp; navigate</li>
+            <li>Score &amp; pass/fail summary</li>
+          </ul>
+          <button class="btn primary" data-start="exam" type="button">Start Exam</button>
+        </article>
+
+        <article class="mode-card" data-mode="revision">
+          <div class="mode-icon">R</div>
+          <h3>Revision Mode</h3>
+          <p>Drill the questions you've previously gotten wrong or flagged for review.</p>
+          <ul class="mode-bullets">
+            <li>Auto-collected from past attempts</li>
+            <li>Skip what you've mastered</li>
+            <li>Reset the queue any time</li>
+          </ul>
+          <button class="btn primary" data-start="revision" type="button">Start Revision</button>
+        </article>
+
+        <article class="mode-card" data-mode="mock">
+          <div class="mode-icon">M</div>
+          <h3>Mock Exam Mode</h3>
+          <p>11 official-style mock exams, 40 questions each, drawn from the published DSOF question pool.</p>
+          <ul class="mode-bullets">
+            <li>Pick exam 1 through 11</li>
+            <li>Timed, exam-like delivery</li>
+            <li>Per-mock scoring &amp; review</li>
+          </ul>
+          <button class="btn primary" type="button" id="btnOpenMockPicker">Choose a Mock</button>
+        </article>
+
+        <article class="mode-card" data-mode="flashcards">
+          <div class="mode-icon">F</div>
+          <h3>Flash Card Mode</h3>
+          <p>Untimed spaced study. See each question, reveal the answer, and rate how well you knew it.</p>
+          <ul class="mode-bullets">
+            <li>All 440 mock questions or one deck</li>
+            <li>Self-rate: Again / Hard / Good</li>
+            <li>Replay the cards you missed</li>
+          </ul>
+          <button class="btn primary" type="button" id="btnOpenFlashPicker">Choose a Deck</button>
+        </article>
+      </div>
+
+      <section id="mockPicker" class="mock-picker hidden">
+        <header class="section-header">
+          <h3>Pick a Mock Exam</h3>
+          <button class="btn ghost" type="button" id="btnCloseMockPicker">Close</button>
+        </header>
+        <div id="mockGrid" class="mock-grid"></div>
+      </section>
+
+      <section id="flashPicker" class="mock-picker hidden">
+        <header class="section-header">
+          <h3>Pick a Flash Card Deck</h3>
+          <button class="btn ghost" type="button" id="btnCloseFlashPicker">Close</button>
+        </header>
+        <p class="muted small" style="margin-bottom: 10px;">Cards are drawn from the mock exam pool. Pick one mock or study all 440 questions in one shuffled deck.</p>
+        <div id="flashGrid" class="mock-grid"></div>
+      </section>
+
+      <section class="config-panel">
+        <h3>Session settings</h3>
+        <div class="config-grid">
+          <label class="field">
+            <span>Number of questions</span>
+            <select id="cfgCount">
+              <option value="10">10</option>
+              <option value="20" selected>20</option>
+              <option value="40">40</option>
+              <option value="all">All available</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Category</span>
+            <select id="cfgCategory">
+              <option value="all">All categories</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Difficulty</span>
+            <select id="cfgDifficulty">
+              <option value="all">All</option>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Exam timer (minutes)</span>
+            <input id="cfgTimer" type="number" min="1" max="180" value="30" />
+          </label>
+
+          <label class="field">
+            <span>Pass mark (%)</span>
+            <input id="cfgPass" type="number" min="1" max="100" value="65" />
+          </label>
+
+          <label class="field checkbox">
+            <input id="cfgShuffle" type="checkbox" checked />
+            <span>Shuffle questions &amp; answers</span>
+          </label>
+        </div>
+      </section>
+    </section>
+
+    <!-- ───────────────────────── Quiz screen ───────────────────────── -->
+    <section id="screen-quiz" class="screen">
+      <div class="quiz-header">
+        <div class="quiz-meta">
+          <span id="quizMode" class="pill">Practice</span>
+          <span id="quizCategory" class="muted small"></span>
+        </div>
+        <div class="quiz-progress">
+          <div class="progress-text">
+            Question <span id="qCurrent">1</span> / <span id="qTotal">20</span>
+          </div>
+          <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+        </div>
+        <div id="timerWrap" class="timer hidden">
+          <span class="timer-label">Time left</span>
+          <span id="timerValue" class="timer-value">30:00</span>
+        </div>
+      </div>
+
+      <article class="question-card">
+        <div class="question-tags">
+          <span id="qCategory" class="tag"></span>
+          <span id="qDifficulty" class="tag tag-soft"></span>
+        </div>
+        <h2 id="qText" class="question-text"></h2>
+        <ul id="choices" class="choices"></ul>
+
+        <div id="feedback" class="feedback hidden">
+          <div id="feedbackVerdict" class="feedback-verdict"></div>
+          <p id="feedbackText" class="feedback-text"></p>
+        </div>
+      </article>
+
+      <div class="quiz-controls">
+        <button id="btnFlag" class="btn ghost" type="button">Flag for review</button>
+        <div class="spacer"></div>
+        <button id="btnPrev" class="btn ghost" type="button">Previous</button>
+        <button id="btnSubmit" class="btn primary" type="button">Submit</button>
+        <button id="btnNext" class="btn primary" type="button">Next</button>
+        <button id="btnFinish" class="btn danger" type="button">Finish</button>
+      </div>
+
+      <section id="navigator" class="navigator">
+        <h4>Question navigator</h4>
+        <div id="navigatorGrid" class="navigator-grid"></div>
+        <div class="navigator-legend">
+          <span><i class="dot dot-current"></i> current</span>
+          <span><i class="dot dot-answered"></i> answered</span>
+          <span><i class="dot dot-flagged"></i> flagged</span>
+          <span><i class="dot dot-empty"></i> unanswered</span>
+        </div>
+      </section>
+    </section>
+
+    <!-- ───────────────────────── Results screen ───────────────────────── -->
+    <section id="screen-results" class="screen">
+      <div class="results-header">
+        <h2 id="resultTitle">Results</h2>
+        <p id="resultSubtitle" class="muted"></p>
+      </div>
+
+      <div class="results-grid">
+        <div class="stat-card big">
+          <span class="stat-label">Score</span>
+          <span id="statScore" class="stat-value">0%</span>
+          <span id="statVerdict" class="stat-sub"></span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Correct</span>
+          <span id="statCorrect" class="stat-value">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Incorrect</span>
+          <span id="statIncorrect" class="stat-value">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Time used</span>
+          <span id="statTime" class="stat-value">—</span>
+        </div>
+      </div>
+
+      <section class="review-section">
+        <div class="review-header">
+          <h3>Detailed review</h3>
+          <div class="review-filter">
+            <button class="chip active" data-filter="all" type="button">All</button>
+            <button class="chip" data-filter="incorrect" type="button">Incorrect</button>
+            <button class="chip" data-filter="skipped" type="button">Skipped</button>
+            <button class="chip" data-filter="flagged" type="button">Flagged</button>
+          </div>
+        </div>
+        <div id="reviewList" class="review-list"></div>
+      </section>
+
+      <div class="results-actions">
+        <button id="btnRetry" class="btn ghost" type="button">Retry similar set</button>
+        <button id="btnHome" class="btn primary" type="button">Back to home</button>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Stats screen ───────────────────────── -->
+    <section id="screen-stats" class="screen">
+      <header class="screen-header">
+        <h2>Your stats</h2>
+        <p class="muted">Tracked locally in your browser. Nothing leaves your device.</p>
+      </header>
+
+      <div id="statsEmpty" class="stats-empty hidden">
+        <h3>No data yet</h3>
+        <p class="muted">Finish a Practice or Exam attempt to populate your analytics.</p>
+        <button class="btn primary" type="button" data-start-from-empty="practice">Start a practice attempt</button>
+      </div>
+
+      <div id="statsContent">
+        <section class="stats-section">
+          <div class="results-grid">
+            <div class="stat-card">
+              <span class="stat-label">Sessions</span>
+              <span id="sSessions" class="stat-value">0</span>
+              <span id="sSessionsSub" class="stat-sub muted"></span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Best score</span>
+              <span id="sBest" class="stat-value">—</span>
+              <span id="sBestSub" class="stat-sub muted"></span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Avg. score</span>
+              <span id="sAvg" class="stat-value">—</span>
+              <span id="sAvgSub" class="stat-sub muted"></span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Pass rate</span>
+              <span id="sPassRate" class="stat-value">—</span>
+              <span id="sPassRateSub" class="stat-sub muted"></span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Question coverage</span>
+              <span id="sCoverage" class="stat-value">—</span>
+              <span id="sCoverageSub" class="stat-sub muted"></span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Questions answered</span>
+              <span id="sAnswered" class="stat-value">0</span>
+              <span id="sAccuracySub" class="stat-sub muted"></span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Study time</span>
+              <span id="sStudyTime" class="stat-value">—</span>
+              <span id="sStudyTimeSub" class="stat-sub muted"></span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Revision queue</span>
+              <span id="sRevision" class="stat-value">0</span>
+              <span class="stat-sub muted">questions to drill</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="stats-section">
+          <header class="section-header">
+            <h3>Score trend</h3>
+            <span class="muted small">Last 20 attempts, oldest to newest</span>
+          </header>
+          <div id="trendChart" class="trend-chart" aria-label="Score trend chart"></div>
+        </section>
+
+        <div class="stats-two-col">
+          <section class="stats-section">
+            <header class="section-header">
+              <h3>By category accuracy</h3>
+              <span class="muted small">Sorted by accuracy</span>
+            </header>
+            <div id="categoryStats" class="category-stats"></div>
+          </section>
+
+          <section class="stats-section">
+            <header class="section-header">
+              <h3>By difficulty</h3>
+              <span class="muted small">Across all attempts</span>
+            </header>
+            <div id="difficultyStats" class="category-stats"></div>
+          </section>
+        </div>
+
+        <section class="stats-section">
+          <header class="section-header">
+            <h3>By mode</h3>
+            <span class="muted small">Practice vs Exam vs Revision</span>
+          </header>
+          <div id="modeStats" class="mode-stats"></div>
+        </section>
+
+        <section class="stats-section">
+          <header class="section-header">
+            <h3>Recent attempts</h3>
+            <span class="muted small">Up to 15 most recent</span>
+          </header>
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>When</th>
+                <th>Mode</th>
+                <th>Score</th>
+                <th>Correct</th>
+                <th>Total</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody">
+              <tr><td colspan="6" class="muted">No attempts yet.</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Flash Cards screen ───────────────────────── -->
+    <section id="screen-flashcards" class="screen">
+      <header class="flash-header">
+        <div class="flash-meta">
+          <span class="pill" id="flashDeckLabel">Deck</span>
+          <span class="muted small" id="flashDeckSub"></span>
+        </div>
+        <div class="flash-progress">
+          <div class="progress-text">
+            Card <span id="flashCurrent">1</span> / <span id="flashTotal">0</span>
+            &nbsp;·&nbsp; <span id="flashScoreLine" class="muted small"></span>
+          </div>
+          <div class="progress-bar"><div id="flashProgressFill" class="progress-fill"></div></div>
+        </div>
+      </header>
+
+      <article class="flashcard" id="flashcard" tabindex="0" aria-label="Flash card">
+        <div class="flashcard-inner">
+          <div class="flashcard-face flashcard-front">
+            <span class="flashcard-tag" id="flashTag"></span>
+            <h2 class="flashcard-question" id="flashQuestion"></h2>
+            <ul class="flashcard-choices" id="flashChoices"></ul>
+            <button class="btn primary flashcard-reveal" type="button" id="btnFlashReveal">Show answer</button>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <span class="flashcard-tag" id="flashTagBack"></span>
+            <h2 class="flashcard-question" id="flashQuestionBack"></h2>
+            <div class="flashcard-answer">
+              <span class="flashcard-answer-label">Correct answer</span>
+              <p class="flashcard-answer-text" id="flashAnswerText"></p>
+            </div>
+            <p class="flashcard-explain" id="flashExplain"></p>
+          </div>
+        </div>
+      </article>
+
+      <div class="flash-rate" id="flashRate">
+        <button class="btn rate-btn rate-again" type="button" data-rate="again">
+          <span class="rate-key">1</span>
+          <span class="rate-label">Again</span>
+          <span class="rate-sub">didn't know</span>
+        </button>
+        <button class="btn rate-btn rate-hard" type="button" data-rate="hard">
+          <span class="rate-key">2</span>
+          <span class="rate-label">Hard</span>
+          <span class="rate-sub">guessed it</span>
+        </button>
+        <button class="btn rate-btn rate-good" type="button" data-rate="good">
+          <span class="rate-key">3</span>
+          <span class="rate-label">Good</span>
+          <span class="rate-sub">knew it</span>
+        </button>
+      </div>
+
+      <div class="flash-controls">
+        <button class="btn ghost" type="button" id="btnFlashPrev">Previous</button>
+        <div class="spacer"></div>
+        <button class="btn ghost" type="button" id="btnFlashShuffle">Shuffle</button>
+        <button class="btn danger" type="button" id="btnFlashEnd">End deck</button>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Flash Cards summary ───────────────────────── -->
+    <section id="screen-flashsummary" class="screen">
+      <header class="screen-header">
+        <h2>Deck complete</h2>
+        <p class="muted" id="flashSummarySub"></p>
+      </header>
+
+      <div class="results-grid">
+        <div class="stat-card big">
+          <span class="stat-label">Cards studied</span>
+          <span class="stat-value" id="flashStatTotal">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Good</span>
+          <span class="stat-value" id="flashStatGood">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Hard</span>
+          <span class="stat-value" id="flashStatHard">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Again</span>
+          <span class="stat-value" id="flashStatAgain">0</span>
+        </div>
+      </div>
+
+      <div class="results-actions">
+        <button class="btn ghost"   type="button" id="btnFlashReplayAll">Restart deck</button>
+        <button class="btn primary" type="button" id="btnFlashReplayMissed">Replay missed</button>
+        <button class="btn ghost"   type="button" id="btnFlashHome">Back to home</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>Local-only practice tool. Not affiliated with any certifying body.</span>
+    <span class="shortcuts">
+      Shortcuts:
+      <kbd>1</kbd>–<kbd>9</kbd> select &nbsp;
+      <kbd>N</kbd>/<kbd>→</kbd> next &nbsp;
+      <kbd>P</kbd>/<kbd>←</kbd> previous &nbsp;
+      <kbd>F</kbd> flag &nbsp;
+      <kbd>Enter</kbd> submit/next
+    </span>
+  </footer>
+
+  <!-- Confirm modal -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <h3 id="modalTitle">Are you sure?</h3>
+      <p id="modalBody">This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button id="modalCancel" class="btn ghost" type="button">Cancel</button>
+        <button id="modalConfirm" class="btn danger" type="button">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/questions.js"></script>
+  <script src="js/mock-exams.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
