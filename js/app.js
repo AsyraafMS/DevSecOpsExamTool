@@ -243,6 +243,26 @@
     if (btnCloseFlash && flashPicker) {
       btnCloseFlash.addEventListener("click", () => flashPicker.classList.add("hidden"));
     }
+
+    // Hero CTAs
+    const btnHeroStart  = document.getElementById("btnHeroStart");
+    const btnHeroStats  = document.getElementById("btnHeroStats");
+    const btnHeroScroll = document.getElementById("btnHeroScroll");
+    if (btnHeroStart) {
+      btnHeroStart.addEventListener("click", () => {
+        const target = document.getElementById("modesSection");
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+    if (btnHeroStats) {
+      btnHeroStats.addEventListener("click", () => showScreen("stats"));
+    }
+    if (btnHeroScroll) {
+      btnHeroScroll.addEventListener("click", () => {
+        const target = document.getElementById("modesSection");
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
   }
 
   function renderMockPicker() {
@@ -1585,6 +1605,44 @@
     });
   }
 
+  // ───────── Live background particles ─────────
+  function spawnParticles() {
+    const root = document.getElementById("bgParticles");
+    if (!root) return;
+
+    // Respect user's motion preference.
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    // Skinnier set on small screens to keep things light.
+    const small = window.innerWidth < 720;
+    const count = small ? 18 : 36;
+
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement("span");
+      el.className = "particle";
+      const size = 2 + Math.random() * 6;        // 2px – 8px
+      const left = Math.random() * 100;          // 0 – 100 vw
+      const startY = 100 + Math.random() * 30;   // start below the fold
+      const duration = 18 + Math.random() * 28;  // 18s – 46s
+      const delay = Math.random() * duration;    // stagger
+      const opacity = 0.25 + Math.random() * 0.45;
+
+      el.style.width  = `${size}px`;
+      el.style.height = `${size}px`;
+      el.style.left   = `${left}vw`;
+      el.style.top    = `${startY}vh`;
+      el.style.opacity = String(opacity);
+      el.style.animationDuration = `${duration}s`;
+      el.style.animationDelay    = `-${delay}s`;
+      root.appendChild(el);
+    }
+  }
+
   // ───────── Boot ─────────
-  document.addEventListener("DOMContentLoaded", init);
+  document.addEventListener("DOMContentLoaded", () => {
+    init();
+    spawnParticles();
+  });
 })();

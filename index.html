@@ -19,11 +19,23 @@
   <meta name="twitter:description" content="Practice, exam, and revision modes for the DevSecOps Foundation syllabus. Runs entirely in your browser." />
 
   <!-- Inline SVG favicon (no extra file needed) -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%235b8cff'/><stop offset='1' stop-color='%238a6bff'/></linearGradient></defs><rect width='64' height='64' rx='14' fill='url(%23g)'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Segoe UI,Arial' font-weight='800' font-size='22' fill='white'>DSO</text></svg>" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%236366f1'/><stop offset='0.5' stop-color='%238b5cf6'/><stop offset='1' stop-color='%23a78bfa'/></linearGradient></defs><rect width='64' height='64' rx='14' fill='url(%23g)'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter,Segoe UI,Arial' font-weight='800' font-size='22' fill='white'>DSO</text></svg>" />
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
+  <!-- Animated background layers (CSS orbs + JS particles) -->
+  <div class="bg-aurora" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+  </div>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-particles" id="bgParticles" aria-hidden="true"></div>
+
   <header class="topbar">
     <div class="brand">
       <span class="brand-mark">DSO</span>
@@ -54,16 +66,63 @@
         </div>
       </div>
 
-      <div class="hero">
-        <h2>Choose your study mode</h2>
-        <p class="muted">
-          A focused practice tool for the DevSecOps Foundation syllabus —
-          principles, culture, controls, threat modeling, security testing,
-          CI/CD, secrets, cloud/containers, monitoring, and IAM.
-        </p>
-      </div>
+      <section class="hero-screen">
+        <div class="hero-inner">
+          <span class="hero-badge">DevSecOps Foundation prep</span>
 
-      <div class="mode-grid">
+          <h1 class="hero-title">
+            Master your<br>
+            <span class="gradient-text">DevSecOps Foundation</span><br>
+            exam.
+          </h1>
+
+          <p class="hero-description">
+            Practice with <strong>608 questions</strong> across
+            <strong>11 official-style mock exams</strong>, a curated study bank, and a flash card deck.
+            Instant feedback, detailed explanations, and progress tracking — all on your device.
+          </p>
+
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span class="hero-stat-value">608</span>
+              <span class="hero-stat-label">Total questions</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-value">11</span>
+              <span class="hero-stat-label">Mock exams</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-value">5</span>
+              <span class="hero-stat-label">Study modes</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-value">100%</span>
+              <span class="hero-stat-label">Local &amp; private</span>
+            </div>
+          </div>
+
+          <div class="hero-actions">
+            <button class="btn primary hero-cta" type="button" id="btnHeroStart">
+              <span>Start studying</span>
+              <span class="hero-cta-arrow">→</span>
+            </button>
+            <button class="btn ghost" type="button" id="btnHeroStats">View your stats</button>
+          </div>
+
+          <button class="hero-scroll" type="button" id="btnHeroScroll" aria-label="Scroll to study modes">
+            <span class="hero-scroll-text">Choose a study mode</span>
+            <span class="hero-scroll-icon">↓</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="modes-section" id="modesSection">
+        <header class="modes-header">
+          <h2>Choose your study mode</h2>
+          <p class="muted">Five ways to learn, drill, and test yourself. Pick whatever fits the moment.</p>
+        </header>
+
+        <div class="mode-grid">
         <article class="mode-card" data-mode="practice">
           <div class="mode-icon">P</div>
           <h3>Practice Mode</h3>
@@ -187,6 +246,7 @@
             <span>Shuffle questions &amp; answers</span>
           </label>
         </div>
+      </section>
       </section>
     </section>
 
