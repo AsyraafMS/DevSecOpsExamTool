@@ -57,6 +57,8 @@
     feedbackVerdict: $("feedbackVerdict"),
     feedbackText:  $("feedbackText"),
     btnFlag:       $("btnFlag"),
+    chkShowAnswer: $("chkShowAnswer"),
+    lblShowAnswer: $("lblShowAnswer"),
     btnPrev:       $("btnPrev"),
     btnSubmit:     $("btnSubmit"),
     btnNext:       $("btnNext"),
@@ -132,6 +134,7 @@
     current: 0,
     timer: { remaining: 0, intervalId: null, total: 0, startedAt: 0 },
     passMark: 65,
+    showAnswers: false,
     finished: false,
   };
 
@@ -322,10 +325,14 @@
     session.revealed = picked.map(() => false);
     session.current = 0;
     session.passMark = cfg.passMark;
+    session.showAnswers = false;
     session.finished = false;
 
     const minutes = Math.max(1, parseInt(cfg.timer, 10) || 60);
     startTimer(minutes * 60);
+
+    els.chkShowAnswer.checked = false;
+    els.lblShowAnswer.classList.remove("hidden");
 
     els.quizMode.textContent = `Mock ${exam.id}`;
     els.quizCategory.textContent = exam.formTitle || exam.title;
@@ -375,6 +382,7 @@
     session.revealed = picked.map(() => false);
     session.current = 0;
     session.passMark = cfg.passMark;
+    session.showAnswers = false;
     session.finished = false;
 
     if (mode === "exam") {
@@ -384,6 +392,9 @@
       stopTimer();
       els.timerWrap.classList.add("hidden");
     }
+
+    els.chkShowAnswer.checked = false;
+    els.lblShowAnswer.classList.toggle("hidden", mode === "practice");
 
     els.quizMode.textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
     els.quizCategory.textContent =
@@ -813,6 +824,11 @@
       renderNavigator();
       saveResumeState();
     });
+    els.chkShowAnswer.addEventListener("change", () => {
+      session.showAnswers = els.chkShowAnswer.checked;
+      updateControls();
+      saveResumeState();
+    });
   }
 
   function renderQuiz() {
@@ -898,8 +914,9 @@
 
     els.btnPrev.disabled = i === 0;
 
-    // Submit button is only meaningful in practice mode (per-question reveal).
-    if (session.mode === "practice") {
+    // Submit button is only meaningful in practice mode, or exam/mock with showAnswers enabled.
+    const showSubmit = session.mode === "practice" || session.showAnswers;
+    if (showSubmit) {
       els.btnSubmit.classList.toggle("hidden", revealed);
       els.btnSubmit.disabled = !answered;
     } else {
@@ -921,7 +938,7 @@
   function onSubmitAnswer() {
     const i = session.current;
     if (session.answers[i] === null) return;
-    if (session.mode !== "practice") return;
+    if (session.mode !== "practice" && !session.showAnswers) return;
     session.revealed[i] = true;
     applyAnswerState();
     updateControls();
@@ -1478,6 +1495,7 @@
       revealed: session.revealed,
       current: session.current,
       passMark: session.passMark,
+      showAnswers: session.showAnswers,
       timer: {
         remaining: session.timer.remaining,
         total: session.timer.total,
@@ -1535,15 +1553,19 @@
     session.revealed = r.revealed || session.questions.map(() => false);
     session.current = Math.min(r.current || 0, Math.max(0, session.questions.length - 1));
     session.passMark = r.passMark || 65;
+    session.showAnswers = !!r.showAnswers;
     session.finished = false;
 
-    if (session.mode === "exam" && r.timer && r.timer.remaining > 0) {
+    if ((session.mode === "exam" || session.mode === "mock") && r.timer && r.timer.remaining > 0) {
       startTimer(r.timer.remaining);
       session.timer.total = r.timer.total || r.timer.remaining;
     } else {
       stopTimer();
       els.timerWrap.classList.add("hidden");
     }
+
+    els.chkShowAnswer.checked = session.showAnswers;
+    els.lblShowAnswer.classList.toggle("hidden", session.mode === "practice");
 
     els.quizMode.textContent = session.mode.charAt(0).toUpperCase() + session.mode.slice(1);
     els.quizCategory.textContent = "(resumed)";
@@ -1594,7 +1616,7 @@
           e.preventDefault();
           break;
         case "Enter":
-          if (session.mode === "practice" && !session.revealed[i] && session.answers[i] !== null) {
+          if ((session.mode === "practice" || session.showAnswers) && !session.revealed[i] && session.answers[i] !== null) {
             onSubmitAnswer();
           } else if (i < session.questions.length - 1) {
             goTo(i + 1);

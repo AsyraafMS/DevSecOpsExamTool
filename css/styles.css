@@ -796,6 +796,44 @@ button { font-family: inherit; }
 }
 .quiz-controls .spacer { flex: 1; }
 
+/* Show answers toggle (mock/exam mode) */
+.toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.toggle-switch input { display: none; }
+.toggle-track {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--border);
+  transition: background 0.2s;
+}
+.toggle-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.3);
+}
+.toggle-switch input:checked + .toggle-track {
+  background: var(--accent);
+}
+.toggle-switch input:checked + .toggle-track::after {
+  transform: translateX(16px);
+}
+
 /* Navigator */
 .navigator {
   background: var(--bg-card);
