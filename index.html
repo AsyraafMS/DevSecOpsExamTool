@@ -92,7 +92,7 @@
               <span class="hero-stat-label">Mock exams</span>
             </div>
             <div class="hero-stat">
-              <span class="hero-stat-value">5</span>
+              <span class="hero-stat-value">6</span>
               <span class="hero-stat-label">Study modes</span>
             </div>
             <div class="hero-stat">
@@ -169,6 +169,18 @@
             <li>Per-mock scoring &amp; review</li>
           </ul>
           <button class="btn primary" type="button" id="btnOpenMockPicker">Choose a Mock</button>
+        </article>
+
+        <article class="mode-card" data-mode="quickstudy">
+          <div class="mode-icon">Q</div>
+          <h3>Quick Study</h3>
+          <p>Read through all questions and answers for any mock exam. No timer, no scoring — just study.</p>
+          <ul class="mode-bullets">
+            <li>All answers shown upfront</li>
+            <li>Pick any mock exam</li>
+            <li>Read at your own pace</li>
+          </ul>
+          <button class="btn primary" type="button" id="btnOpenQuickStudy">Choose a Mock</button>
         </article>
 
         <article class="mode-card" data-mode="flashcards">
@@ -564,6 +576,23 @@
         <button class="btn ghost"   type="button" id="btnFlashReplayAll">Restart deck</button>
         <button class="btn primary" type="button" id="btnFlashReplayMissed">Replay missed</button>
         <button class="btn ghost"   type="button" id="btnFlashHome">Back to home</button>
+      </div>
+    </section>
+    <!-- ───────────────────────── Quick Study screen ───────────────────────── -->
+    <section id="screen-quickstudy" class="screen">
+      <header class="screen-header">
+        <h2 id="qsTitle">Quick Study</h2>
+        <p class="muted" id="qsSubtitle"></p>
+      </header>
+
+      <div class="results-actions" style="margin-top:0;margin-bottom:20px;">
+        <button id="btnQuickStudyHome" class="btn ghost" type="button">Back to home</button>
+      </div>
+
+      <div id="qsList" class="review-list"></div>
+
+      <div class="results-actions">
+        <button id="btnQuickStudyHome2" class="btn primary" type="button">Back to home</button>
       </div>
     </section>
   </main>

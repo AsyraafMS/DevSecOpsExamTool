@@ -27,7 +27,10 @@
     stats:        $("screen-stats"),
     flashcards:   $("screen-flashcards"),
     flashsummary: $("screen-flashsummary"),
+    quickstudy:   $("screen-quickstudy"),
   };
+
+  let pickerMode = "mock"; // "mock" | "quickstudy"
 
   const els = {
     // nav
@@ -151,6 +154,7 @@
     bindAutosave();
     bindFlashEvents();
     bindFlashKeyboard();
+    bindQuickStudyEvents();
     showResumeIfAny();
     showScreen("home");
   }
@@ -224,6 +228,7 @@
     const picker   = document.getElementById("mockPicker");
     if (btnOpen && picker) {
       btnOpen.addEventListener("click", () => {
+        pickerMode = "mock";
         renderMockPicker();
         picker.classList.remove("hidden");
         picker.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -231,6 +236,16 @@
     }
     if (btnClose && picker) {
       btnClose.addEventListener("click", () => picker.classList.add("hidden"));
+    }
+    // Quick Study picker — reuses mockPicker
+    const btnOpenQS  = document.getElementById("btnOpenQuickStudy");
+    if (btnOpenQS && picker) {
+      btnOpenQS.addEventListener("click", () => {
+        pickerMode = "quickstudy";
+        renderMockPicker();
+        picker.classList.remove("hidden");
+        picker.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     }
     // Flash card picker
     const btnOpenFlash  = document.getElementById("btnOpenFlashPicker");
@@ -271,6 +286,13 @@
   function renderMockPicker() {
     const grid = document.getElementById("mockGrid");
     if (!grid || !window.MOCK_EXAMS) return;
+
+    // Update picker heading based on mode
+    const heading = document.querySelector("#mockPicker .section-header h3");
+    if (heading) {
+      heading.textContent = pickerMode === "quickstudy" ? "Pick a Mock for Quick Study" : "Pick a Mock Exam";
+    }
+
     grid.innerHTML = "";
     window.MOCK_EXAMS.forEach((exam) => {
       const card = document.createElement("button");
@@ -288,7 +310,13 @@
       card.querySelector(".mock-card-title").textContent = exam.formTitle || exam.title;
       card.querySelector(".mock-card-desc").textContent = exam.description || "";
       card.querySelector(".mock-card-meta").textContent = `${exam.questions.length} questions`;
-      card.addEventListener("click", () => startMockExam(exam.id));
+      card.addEventListener("click", () => {
+        if (pickerMode === "quickstudy") {
+          startQuickStudy(exam.id);
+        } else {
+          startMockExam(exam.id);
+        }
+      });
       grid.appendChild(card);
     });
   }
@@ -342,6 +370,65 @@
     saveResumeState();
     renderQuiz();
     showScreen("quiz");
+  }
+
+  function startQuickStudy(examId) {
+    const exam = (window.MOCK_EXAMS || []).find((e) => e.id === examId);
+    if (!exam) {
+      alert(`Mock Exam ${examId} not found.`);
+      return;
+    }
+
+    // Hide the picker
+    const picker = document.getElementById("mockPicker");
+    if (picker) picker.classList.add("hidden");
+
+    // Build questions (no shuffling needed — just show as-is)
+    const questions = exam.questions.map((mq, idx) => ({
+      id: `mock-${exam.id}-${idx + 1}`,
+      question: mq.q,
+      choices: mq.choices.slice(),
+      answer: mq.answer,
+      explanation: mq.explanation || "",
+    }));
+
+    renderQuickStudyView(exam, questions);
+    showScreen("quickstudy");
+  }
+
+  function renderQuickStudyView(exam, questions) {
+    document.getElementById("qsTitle").textContent = `Quick Study — Mock ${exam.id}`;
+    document.getElementById("qsSubtitle").textContent = exam.formTitle || exam.title;
+
+    const list = document.getElementById("qsList");
+    list.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const node = document.createElement("article");
+      node.className = "review-item";
+
+      let choicesHtml = "";
+      q.choices.forEach((c, ci) => {
+        const isCorrect = ci === q.answer;
+        choicesHtml += `<li class="qs-choice${isCorrect ? " qs-correct" : ""}"><span class="qs-marker">${String.fromCharCode(65 + ci)}</span><span>${escapeHtml(c)}</span></li>`;
+      });
+
+      node.innerHTML = `
+        <div class="review-meta">
+          <span class="tag tag-soft">Q${idx + 1}</span>
+        </div>
+        <div class="review-q"></div>
+        <ul class="qs-choices"></ul>
+        <p class="review-explain"></p>
+      `;
+
+      node.querySelector(".review-q").textContent = q.question;
+      node.querySelector(".qs-choices").innerHTML = choicesHtml;
+      node.querySelector(".review-explain").textContent = q.explanation || "";
+      list.appendChild(node);
+    });
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function startSession(mode) {
@@ -802,6 +889,13 @@
           break;
       }
     });
+  }
+
+  function bindQuickStudyEvents() {
+    const btnHome1 = document.getElementById("btnQuickStudyHome");
+    const btnHome2 = document.getElementById("btnQuickStudyHome2");
+    if (btnHome1) btnHome1.addEventListener("click", () => showScreen("home"));
+    if (btnHome2) btnHome2.addEventListener("click", () => showScreen("home"));
   }
 
   // ═════════════════════════════════════════════════════════════════════

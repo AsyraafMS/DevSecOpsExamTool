@@ -1509,6 +1509,51 @@ button { font-family: inherit; }
 }
 .flash-controls .spacer { flex: 1; }
 
+/* ───── Quick Study ───── */
+.qs-choices {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.qs-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.qs-choice.qs-correct {
+  background: var(--success-bg);
+  border-color: var(--success-border);
+  color: var(--text-primary);
+}
+.qs-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 800;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.qs-choice.qs-correct .qs-marker {
+  background: var(--success);
+  border-color: var(--success);
+  color: var(--text-primary);
+}
+
 /* ───── Responsive ───── */
 @media (max-width: 960px) {
   .hero-stats { grid-template-columns: repeat(2, 1fr); }
